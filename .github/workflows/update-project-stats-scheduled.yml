@@ -58,16 +58,24 @@ jobs:
         id: validate
         run: |
           MESSAGE=$(bundle exec ruby scripts/review_changes.rb)
-          echo 'EXIT_CODE=$?' >> "$GITHUB_OUTPUT"
-          echo $MESSAGE
+          EXIT_CODE=$?
+
+          echo "EXIT_CODE: '$EXIT_CODE'"
+          if [[ $EXIT_CODE -eq 0 ]]; then
+            echo 'VALID=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo 'VALID=false' >> "$GITHUB_OUTPUT"
+          echo "MESSAGE: '$MESSAGE'"
         if: ${{ steps.git_commit.outputs.CHANGES }}
         env:
           BASE_SHA: ${{ steps.git_commit.outputs.BASE }}
           HEAD_SHA: ${{ steps.git_commit.outputs.HEAD }}
           GITHUB_TOKEN: ${{ secrets.SHIFTBOT_TOKEN }}
 
-      - name: Push the changes to the default branch (if any)
-        if: ${{ steps.git_commit.outputs.CHANGES && steps.validate.outputs.EXIT_CODE == 0 }}
+      - name: Push the changes to the default branch (if valid and present)
         id: git_push
+        if: ${{ steps.git_commit.outputs.CHANGES && steps.validate.outputs.VALID }}
         run: |
           git push

@@ -20,8 +20,11 @@ jobs:
 
       - name: Run script to review changed projects
         id: run_script
+        continue-on-error: true
         run: |
           MESSAGE=$(bundle exec ruby scripts/review_changes.rb) 
+          echo "exit code: '$?'"
+          echo "message: '$MESSAGE'"
           echo 'message<<EOF' >> "$GITHUB_OUTPUT"
           echo "$MESSAGE" >> "$GITHUB_OUTPUT"
           echo 'EOF' >> "$GITHUB_OUTPUT"
@@ -32,6 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SHIFTBOT_TOKEN }}
 
       - uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31
+        continue-on-error: true
         with:
           message: ${{ steps.run_script.outputs.message }}
           GITHUB_TOKEN: ${{ secrets.SHIFTBOT_TOKEN }}

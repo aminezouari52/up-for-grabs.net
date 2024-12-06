@@ -15,7 +15,7 @@ require 'open3'
 
 require 'up_for_grabs_tooling'
 
-DEFAULT_REPOSITORY_URL = 'https://github.com/up-for-grabs/up-for-grabs.net.git'
+DEFAULT_GIT_REMOTE = 'https://github.com/up-for-grabs/up-for-grabs.net.git'
 
 def run(cmd)
   stdout, stderr, status = Open3.capture3(cmd)
@@ -244,12 +244,12 @@ end
 
 head_sha = ENV.fetch('HEAD_SHA', nil)
 base_sha = ENV.fetch('BASE_SHA', nil)
-git_remote_url = ENV.fetch('GIT_REMOTE_URL', DEFAULT_REPOSITORY_URL)
+git_remote_url = ENV.fetch('GIT_REMOTE_URL', nil)
 dir = ENV.fetch('GITHUB_WORKSPACE', nil)
 
 range = "#{base_sha}...#{head_sha}"
 
-if git_remote_url != DEFAULT_REPOSITORY_URL
+if git_remote_url && git_remote_url != DEFAULT_GIT_REMOTE
   # fetching the fork repository so that our commits are in this repository
   # for processing and comparison with the base branch
   remote_result = run "git -C '#{dir}' remote add fork #{git_remote_url} -f"
@@ -261,6 +261,21 @@ if git_remote_url != DEFAULT_REPOSITORY_URL
 
   unless remote_result[:exit_code].zero?
     warn "A git error occurred while trying to add the remote #{git_remote_url}"
+    warn
+    warn "exit code: #{remote_result[:exit_code]}"
+    warn
+    warn "stderr: '#{remote_result[:stderr]}'"
+    warn
+    warn "stdout: '#{remote_result[:stdout]}'"
+    exit 123
+  end
+else
+  # fetching the current repository so that our commits are in this repository
+  # for processing and comparison with the base branch
+  remote_result = run 'git fetch'
+
+  unless remote_result[:exit_code].zero?
+    warn 'A git error occurred while trying to fetch for the current repository'
     warn
     warn "exit code: #{remote_result[:exit_code]}"
     warn
