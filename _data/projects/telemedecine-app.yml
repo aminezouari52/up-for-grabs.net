@@ -3,8 +3,8 @@ desc: This project is an open-source platform designed to facilitate secure, rea
 site: https://bucolic-malabi-07ed64.netlify.app
 tags:
   - mern
-  - node
-  - react
+  - node.js
+  - reactjs
   - real-time
   - chat
   - firebase
