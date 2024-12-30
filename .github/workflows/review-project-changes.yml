@@ -14,7 +14,7 @@ jobs:
         with:
           ref: gh-pages
       - name: Setup Ruby
-        uses: ruby/setup-ruby@2a18b06812b0e15bb916e1df298d3e740422c47e
+        uses: ruby/setup-ruby@bfefad842bb982ff05b233bcbc1571d97a87e69f
         with:
           bundler-cache: true
 
@@ -22,7 +22,7 @@ jobs:
         id: run_script
         continue-on-error: true
         run: |
-          MESSAGE=$(bundle exec ruby scripts/review_changes.rb) 
+          MESSAGE=$(bundle exec ruby scripts/review_changes.rb --skip-exit-code)
           echo "exit code: '$?'"
           echo "message: '$MESSAGE'"
           echo 'message<<EOF' >> "$GITHUB_OUTPUT"
@@ -39,4 +39,3 @@ jobs:
         with:
           message: ${{ steps.run_script.outputs.message }}
           GITHUB_TOKEN: ${{ secrets.SHIFTBOT_TOKEN }}
-
